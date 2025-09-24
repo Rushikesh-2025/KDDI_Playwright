@@ -1,0 +1,32 @@
+{
+  "name": "kddi_playwright",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {},
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@playwright/test": "^1.55.1",
+    "@types/csv-parse": "^1.1.12",
+    "@types/imap-simple": "^4.2.10",
+    "@types/mailparser": "^3.4.6",
+    "@types/moment-timezone": "^0.5.13",
+    "@types/node": "^24.5.2",
+    "@types/otplib": "^7.0.0",
+    "@types/winston": "^2.4.4",
+    "dotenv": "^17.2.2",
+    "mailosaur": "^8.8.1"
+  },
+  "dependencies": {
+    "@faker-js/faker": "^10.0.0",
+    "csv-parse": "^6.1.0",
+    "imap-simple": "^5.1.0",
+    "mailparser": "^3.7.4",
+    "moment-timezone": "^0.6.0",
+    "otplib": "^4.0.6",
+    "winston": "^3.17.0"
+  }
+}
