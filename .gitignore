@@ -8,3 +8,4 @@ node_modules/
 storageState.json
 token.txt
 playwright/.auth
+userSession.json
