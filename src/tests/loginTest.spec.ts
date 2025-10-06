@@ -2,6 +2,7 @@ import { test, expect, Page } from '@playwright/test';
 import LoginPage from "../pages/LoginPage";
 import logger from "../utils/LoggerUtil";
 import { EnvConfig } from "../config/viriableConstant";
+<<<<<<< HEAD
 import fs from "fs";
 
 // This test will always run in headed mode
@@ -56,3 +57,6 @@ test('dashborad Access', async ({ browser }) => {
   await page.goto(`${EnvConfig.baseURL}/screenSelection`);
 
 })
+=======
+import { authenticator } from 'otplib'; // ✅ Import otplib's authenticator
+>>>>>>> 3fe918ee394065f9cc7e172980cd9524b3bdcf6e
