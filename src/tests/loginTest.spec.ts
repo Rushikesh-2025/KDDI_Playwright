@@ -2,42 +2,57 @@ import { test, expect, Page } from '@playwright/test';
 import LoginPage from "../pages/LoginPage";
 import logger from "../utils/LoggerUtil";
 import { EnvConfig } from "../config/viriableConstant";
-import { authenticator } from 'otplib'; // ✅ Import otplib's authenticator
+import fs from "fs";
 
-
-// **IMPORTANT:** Replace with your test account's MFA secret key
-// This key is static and should be managed securely (e.g., from EnvConfig)
-const mfaSecretKey = "JBSWY3DPEHPK3PXP";
-
-async function getLoginPage(page: Page) {
-  const loginPage = new LoginPage(page);
-  await loginPage.navigateToLoginPage();
-  return loginPage;
-}
-
-test.only("Verify Successful Login with Valid Credentials", async ({ page }) => {
+// This test will always run in headed mode
+test.use({ headless: false });
+test("Verify Successful Login with Valid Credentials", async ({ page }) => {
   logger.info("Starting: Login with valid credentials");
-  const loginPage = await getLoginPage(page);
+  const loginPage = new LoginPage(page);
+  await page.goto(`${EnvConfig.baseURL}/login`);
 
   await loginPage.fillUsername(EnvConfig.email);
+  logger.info('Login email entered successfully');
+
   await loginPage.fillPassword(EnvConfig.password);
+  logger.info('Login password entered successfully');
+
   await loginPage.clickLoginButton();
+  logger.info('Click on Login button successfully');
 
-  // Wait for MFA screen (your selector may vary)
-  await page.waitForSelector('input[name="mfaCode[0]"]', { timeout: 15000 });
+  console.log('!!! MANUAL ACTION REQUIRED !!!');
+  console.log('The browser will now PAUSE. Please enter the 6-digit MFA code manually in the browser and click "送信" (Send).');
+  console.log('After entering the code, press F8 or click the "Resume" button in the Playwright UI (inspector) to continue.');
 
-  // ✅ Generate the MFA code using the static secret key
-  const code = authenticator.generate(mfaSecretKey);
-  console.log(`Generated MFA code: ${code}`);
-
-  // Fill code digits into inputs
-  for (let i = 0; i < code.length; i++) {
-    await page.locator(`input[name="mfaCode[${i}]"]`).fill(code[i]);
-  }
+  // Pause for MFA manual entry
+  await page.pause();
+  logger.info('The browser will now PAUSE for MFA.');
 
   // Submit MFA
   await page.getByRole('button', { name: '送信' }).click();
+  logger.info('Click on Verify Button successfully');
 
-  // Verify successful login
-  await expect(page).toHaveURL(/dashboard/);
+  await expect(page).toHaveURL(`${EnvConfig.baseURL}/screenSelection`);
+  logger.info('✅ Login completed');
+
+  // Save sessionStorage to file
+  const sessionStorage = await page.evaluate(() => {
+    let store: Record<string, string> = {};
+    for (let i = 0; i < window.sessionStorage.length; i++) {
+      const key = window.sessionStorage.key(i)!;
+      store[key] = window.sessionStorage.getItem(key)!;
+    }
+    return store;
+  });
+
+  fs.writeFileSync("userSession.json", JSON.stringify(sessionStorage));
+  console.log("✅ Session storage saved to userSession.json");
 });
+
+
+test('dashborad Access', async ({ browser }) => {
+  const context = await browser.newContext({ storageState: "userSession.json" })
+  const page = await context.newPage()
+  await page.goto(`${EnvConfig.baseURL}/screenSelection`);
+
+})

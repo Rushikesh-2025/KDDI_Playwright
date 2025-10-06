@@ -1,17 +1,18 @@
 import { defineConfig, devices } from '@playwright/test';
-
+import dotenv from 'dotenv';
+import path from 'path';
+import globalSetup from './src/config/global-setup';
+dotenv.config({ path: path.resolve(__dirname, '//src//config//.env') });
 /**
  * Read environment variables from file.
  * https://github.com/motdotla/dotenv
  */
-import dotenv from 'dotenv';
-import path from 'path';
-dotenv.config({ path: path.resolve(__dirname, '//src//config//.env') });
 
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
+  timeout: 50 * 1000,
   testDir: './src/tests',
   /* Run tests in files in parallel */
   fullyParallel: true,
@@ -22,19 +23,40 @@ export default defineConfig({
   /* Opt out of parallel tests on CI. */
   workers: process.env.CI ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: 'html',
+  //reporter: 'html',
+  reporter: [['html', { open: 'always', outputFolder: 'src/reporting' }], ['allure-playwright'],
+  ['dot'],
+  ['list'],
+  ['pwmochawesome', {
+    outputJSON: true,
+    reportDir: 'mochawesome-report',
+    reportTitle: 'Playwright E2E Report',
+    charts: true,
+    // other options
+    globalSetup: require.resolve('./src/config/global-setup'),
+    use: {
+      baseURL: 'https://external.dev.kddi-fs.veritrans.jp/portal',
+    },
+
+  }]],
+
+
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
-    /* Base URL to use in actions like `await page.goto('/')`. */
-    // baseURL: 'http://localhost:3000',
-
-    /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
+    baseURL: process.env.baseURL,
     trace: 'on-first-retry',
-    ignoreHTTPSErrors: true,  // 👈 bypass self-signed cert
+    screenshot: 'only-on-failure',
+    video: 'on',
+    viewport: { width: 1280, height: 720 },
+    ignoreHTTPSErrors: true,   //Ignore SSL error if necessary
+    permissions: ['geolocation'],
+    //headless: true,
+
   },
 
   /* Configure projects for major browsers */
   projects: [
+    
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
@@ -44,6 +66,7 @@ export default defineConfig({
       name: 'firefox',
       use: { ...devices['Desktop Firefox'] },
     },
+    
 
     {
       name: 'webkit',

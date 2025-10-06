@@ -24,22 +24,19 @@ export default class LoginPage {
   // Navigate to login page
   async navigateToLoginPage() {
     logger.info("Navigating to login page...");
-    await this.page.goto('https://external.dev.kddi-fs.veritrans.jp/portal/login');
+    await this.page.goto(`${EnvConfig.baseURL}/login`);
   }
 
   // Actions
   async fillUsername(username: string) {
-    logger.info(`Filling username: ${username}`);
     await this.usernameInput.fill(username);
   }
 
   async fillPassword(password: string) {
-    logger.info("Filling password...");
     await this.passwordInput.fill(password);
   }
 
   async clickLoginButton() {
-    logger.info("Clicking login button...");
     await this.loginButton.click();
   }
 
